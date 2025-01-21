@@ -26,11 +26,24 @@ let isScratching = false;
 canvas.addEventListener('mousedown', () => isScratching = true);
 canvas.addEventListener('mouseup', () => isScratching = false);
 canvas.addEventListener('mousemove', scratch);
-canvas.addEventListener('touchstart', () => isScratching = true);
-canvas.addEventListener('touchend', () => isScratching = false);
+
+canvas.addEventListener('touchstart', (e) => {
+    isScratching = true;
+    e.preventDefault();
+});
+canvas.addEventListener('touchend', (e) => {
+    isScratching = false;
+    e.preventDefault();
+});
 canvas.addEventListener('touchmove', (e) => {
+    if (!isScratching) return;
     const touch = e.touches[0];
-    scratch({ offsetX: touch.clientX - canvas.offsetLeft, offsetY: touch.clientY - canvas.offsetTop });
+    const rect = canvas.getBoundingClientRect();
+    scratch({
+        offsetX: touch.clientX - rect.left,
+        offsetY: touch.clientY - rect.top
+    });
+    e.preventDefault();
 });
 
 function scratch(e) {
@@ -44,6 +57,7 @@ function scratch(e) {
 
 // Clear enough surface to reveal the prize
 canvas.addEventListener('mouseup', checkScratch);
+canvas.addEventListener('touchend', checkScratch);
 
 function checkScratch() {
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
